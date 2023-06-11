@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cadence Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  </head>
+  <body>
+    <h1>Key's colour's app</h1>
+    <button id="button-1">1</button>
+    <button id="button-2">2</button>
+    <button id="button-3">3</button>
+    <button id="button-4">4</button>
+    <button id="button-5">5</button>
+    <button id="button-6">6</button>
+    <button id="button-7">7</button>
+    <p>Your answer: <span id="chosen-degrees"></span></p>
+    <button id="play-button">Play Cadence</button>
+    <button id="check-answer">Check answer</button>
+    <button id="test">Test me</button>
+    <button id="repeat">Repeat</button>
+    <button id="reveal">Reveal answer</button>
+    <button id="change-key">Change key</button>
+
+    <p id="answer"></p>
+    <div class="slidecontainer">
+      <input
+        id="exercise-length"
+        type="range"
+        min="1"
+        max="5"
+        value="1"
+        class="slider"
+        id="myRange"
+      />
+    </div>
+    <p id="current-exercise-length"></p>
+    <p id="current-key"></p>
+  </body>
+  <script>
+    let exerciseLength = 3;
+    let keyNote = "C4";
+    let chosenDegrees = [];
+    let testNotes;
+    const buttonIds = [1, 2, 3, 4, 5, 6, 7];
+    buttonIds.forEach((id) => {
+      document.querySelector(`#button-${id}`).addEventListener("click", (e) => {
+        const chosenDegree = e.target.innerText;
+        chosenDegrees.push(chosenDegree);
+        console.log({ chosenDegrees });
+        document.querySelector("#chosen-degrees").innerText =
+          document.querySelector("#chosen-degrees").innerText + chosenDegree;
+      });
+    });
+    function checkAnswer() {
+      console.log({
+        chosenDegrees,
+        testNotes: testNotes.map(
+          (testNote) =>
+            getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
+        ),
+      });
+      return _.isEqual(
+        chosenDegrees.map(Number),
+        testNotes.map(
+          (testNote) =>
+            getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
+        )
+      );
+    }
+    document.querySelector("#check-answer").addEventListener("click", () => {
+      const isRight = checkAnswer();
+
+      if (isRight) {
+        const p = document.createElement("p");
+        p.innerText = "&#10004;";
+        p.style.color = "green";
+        document.body.appendChild(p);
+      }
+      chosenDegrees = [];
+      document.querySelector("#chosen-degrees").innerText = "";
+    });
+    document.querySelector("#current-key").innerText = `Key: ${keyNote}`;
+    const noteLetters = [
+      "C", // 0
+      "C#",
+      "D", // 2
+      "D#",
+      "E", // 4
+      "F", // 5
+      "F#",
+      "G", // 7
+      "G#",
+      "A", // 9
+      "A#",
+      "B", // 11
+    ];
+    const sharps = ["C#", "D#", "F#", "G#", "A#"];
+    const notes = noteLetters.map((note) => note + 1);
+    const fullNoteRange = [
+      ...noteLetters.map((note) => note + 1),
+      ...noteLetters.map((note) => note + 2),
+      ...noteLetters.map((note) => note + 3),
+      ...noteLetters.map((note) => note + 4),
+      ...noteLetters.map((note) => note + 5),
+    ];
+    const getDiatonicNotes = (keyNote) => {
+      const scaleIndexes = [2, 4, 5, 7, 9, 11];
+      const indexOfKey = fullNoteRange.findIndex((note) => note === keyNote);
+      const diatonicScale = [keyNote];
+      for (const index of scaleIndexes) {
+        diatonicScale.push(fullNoteRange[indexOfKey + index]);
+      }
+      return diatonicScale;
+    };
+    const getSubdominant = (keyNote) => {
+      const indexOfKey = fullNoteRange.findIndex((note) => note === keyNote);
+      return fullNoteRange[indexOfKey + 5];
+    };
+    const getDominant = (keyNote) => {
+      const indexOfKey = fullNoteRange.findIndex((note) => note === keyNote);
+      return fullNoteRange[indexOfKey + 7];
+    };
+    const buildMajorTriad = (tonic) => {
+      const triadIndexes = [4, 7];
+      const indexOfKey = fullNoteRange.findIndex((note) => note === tonic);
+      const majorTriad = [tonic];
+      for (const index of triadIndexes) {
+        majorTriad.push(fullNoteRange[indexOfKey + index]);
+      }
+
+      return majorTriad;
+    };
+    async function playExercise(testNotes) {
+      await Tone.start();
+
+      const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      const now = Tone.now();
+
+      testNotes.forEach((note, index) => {
+        synth.triggerAttackRelease(note, "2n", now + index);
+      });
+    }
+    const createExerciseNotes = (exerciseLength) => {
+      const diatonicNotes = getDiatonicNotes(keyNote);
+      const testNotes = _.sampleSize(diatonicNotes, exerciseLength);
+      return testNotes;
+    };
+
+    document.querySelector(
+      "#current-exercise-length"
+    ).innerText = `Exercise length: ${exerciseLength}`;
+    document
+      .getElementById("exercise-length")
+      ?.addEventListener("input", (e) => {
+        exerciseLength = e.target.value;
+        document.querySelector(
+          "#current-exercise-length"
+        ).innerText = `Exercise length: ${exerciseLength}`;
+      });
+    document
+      .getElementById("play-button")
+      ?.addEventListener("click", async () => {
+        await Tone.start();
+        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        const now = Tone.now();
+        synth.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now);
+        synth.triggerAttackRelease(
+          buildMajorTriad(getSubdominant(keyNote)),
+          "2n",
+          now + 1
+        );
+        synth.triggerAttackRelease(
+          buildMajorTriad(getDominant(keyNote)),
+          "2n",
+          now + 2
+        );
+        synth.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now + 3);
+
+        const diatonicNotes = getDiatonicNotes("C4");
+      });
+    document.getElementById("test")?.addEventListener("click", async () => {
+      testNotes = createExerciseNotes(exerciseLength);
+      await playExercise(testNotes);
+    });
+    document.querySelector("#repeat")?.addEventListener("click", async () => {
+      await playExercise(testNotes);
+    });
+    document.querySelector("#change-key").addEventListener("click", () => {
+      keyNote = _.sample(fullNoteRange.slice(12, -12));
+      document.querySelector("#current-key").innerText = `Key: ${keyNote}`;
+    });
+    document.querySelector("#reveal")?.addEventListener("click", () => {
+      document.querySelector("#answer").innerText = JSON.stringify(
+        testNotes.map(
+          (testNote) =>
+            getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
+        )
+      );
+    });
+  </script>
+</html>
