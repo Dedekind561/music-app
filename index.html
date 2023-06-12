@@ -15,6 +15,7 @@
     <button id="button-6">6</button>
     <button id="button-7">7</button>
     <p>Your answer: <span id="chosen-degrees"></span></p>
+    <p id="feedback">some text here:<span id="feedback-icon"></span></p>
     <button id="play-button">Play Cadence</button>
     <button id="check-answer">Check answer</button>
     <button id="test">Test me</button>
@@ -38,7 +39,7 @@
     <p id="current-key"></p>
   </body>
   <script>
-    let exerciseLength = 3;
+    let exerciseLength = 1;
     let keyNote = "C4";
     let chosenDegrees = [];
     let testNotes;
@@ -47,18 +48,22 @@
       document.querySelector(`#button-${id}`).addEventListener("click", (e) => {
         const chosenDegree = e.target.innerText;
         chosenDegrees.push(chosenDegree);
-        console.log({ chosenDegrees });
+
         document.querySelector("#chosen-degrees").innerText =
           document.querySelector("#chosen-degrees").innerText + chosenDegree;
       });
     });
+
+    function noteToDegree(testNote, keyNote) {
+      return (
+        getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
+      );
+    }
+
     function checkAnswer() {
       console.log({
         chosenDegrees,
-        testNotes: testNotes.map(
-          (testNote) =>
-            getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
-        ),
+        testNotes: testNotes.map((testNote) => noteToDegree(testNote, keyNote)),
       });
       return _.isEqual(
         chosenDegrees.map(Number),
@@ -72,10 +77,14 @@
       const isRight = checkAnswer();
 
       if (isRight) {
-        const p = document.createElement("p");
-        p.innerText = "&#10004;";
-        p.style.color = "green";
-        document.body.appendChild(p);
+        document.querySelector(
+          "#feedback"
+        ).innerHTML = `You're right! :<span id="feedback-icon">&#10003;</span>, the answer was ${JSON.stringify(
+          testNotes.map((testNote) => noteToDegree(testNote, keyNote))
+        )}`;
+        console.log(document.querySelector("#feedback-icon"));
+        // document.querySelector("#feedback-icon").innerHtml = "&#10003;";
+        document.querySelector("#feedback-icon").style.color = "green";
       }
       chosenDegrees = [];
       document.querySelector("#chosen-degrees").innerText = "";
@@ -104,6 +113,13 @@
       ...noteLetters.map((note) => note + 4),
       ...noteLetters.map((note) => note + 5),
     ];
+    const buildPerfectCadence = (keyNote) => {
+      return {
+        chordI: buildMajorTriad(keyNote),
+        chordIV: buildMajorTriad(getSubdominant(keyNote)),
+        chordV: buildMajorTriad(getDominant(keyNote)),
+      };
+    };
     const getDiatonicNotes = (keyNote) => {
       const scaleIndexes = [2, 4, 5, 7, 9, 11];
       const indexOfKey = fullNoteRange.findIndex((note) => note === keyNote);
