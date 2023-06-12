@@ -54,6 +54,13 @@
       });
     });
 
+    document.querySelector("#backspace").addEventListener("click", (e) => {
+      document.querySelector("#chosen-degrees").innerText = document
+        .querySelector("#chosen-degrees")
+        .innerText.slice(0, -1);
+      chosenDegrees.pop();
+    });
+
     function noteToDegree(testNote, keyNote) {
       return (
         getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
