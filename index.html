@@ -60,42 +60,24 @@
     let chordType;
     const buttonIds = [1, 2, 3, 4, 5, 6, 7];
     buttonIds.forEach((id) => {
-      console.log({ chosenDegrees });
       document.querySelector(`#button-${id}`).addEventListener("click", (e) => {
         const chosenDegree = +e.target.innerText;
-        // chosenDegrees.push([chosenDegree]);
-        // let i = 0;
-        // console.log(chosenDegrees, "<------- before while loop");
-        // do {
-        //   const element = chosenDegrees[i];
-        //   if (element) {
-        //     if (!element[0]) {
-        //       element[0] = chosenDegree;
-        //       break;
-        //     }
-        //     if (!element[1]) {
-        //       element[1] = chosenDegree;
-        //       break;
-        //     }
-        //     i++;
-        //   }
-        // } while (i < chosenDegrees.length);
+
         const chordTypeToNumber = {
           "single-note": 1,
           dyad: 2,
           triad: 3,
           tetrad: 4,
         };
-        console.log({ exerciseLength, chosenDegrees });
+
         for (let i = 0; i < exerciseLength; i++) {
-          console.log({ i });
           if (!chosenDegrees[i]) {
             chosenDegrees[i] = [chosenDegree];
           } else if (chosenDegrees[i].length < chordTypeToNumber[chordType]) {
             chosenDegrees[i].push(chosenDegree);
           }
         }
-        console.log("8".repeat(20), chosenDegrees);
+
         document.querySelector("#your-answer").innerHtml =
           "Your answer:  " + `<span></span>`.repeat(exerciseLength);
         chosenDegrees.forEach((degrees, index) => {
@@ -103,37 +85,11 @@
             `#your-answer span:nth-child(${index + 1})`
           ).innerText = "";
           degrees.forEach((degree) => {
-            console.log(
-              document.querySelector(
-                `#your-answer span:nth-child(${index + 1})`
-              )
-            );
-            console.log({ degree }, "<<<<");
-            // document.querySelector(`#your-answer span:nth-child(${index + 1})`);
-
             document.querySelector(
               `#your-answer span:nth-child(${index + 1})`
             ).innerText += `${degree},`;
           });
         });
-        // for (let i = 0; i < exerciseLength; i++) {
-        //   console.log(chosenDegrees);
-        //   if (chosenDegrees[i] === undefined) {
-        //     document.querySelector(
-        //       `#your-answer span:nth-child(${i + 1})`
-        //     ).innerText = "_";
-        //   } else {
-        //     console.log("(****************)");
-        //     chosenDegrees.forEach((degree) => {
-        //       console.log(
-        //         document.querySelector(`#your-answer span:nth-child(${i + 1})`)
-        //       );
-        //       document.querySelector(
-        //         `#your-answer span:nth-child(${i + 1})`
-        //       ).innerHtml += `<p>${degree}</p>`;
-        //     });
-        //   }
-        // }
       });
     });
 
@@ -164,23 +120,7 @@
     }
 
     function checkAnswer() {
-      console.log({ chosenDegrees, testNotes });
-      console.log({
-        chosenDegrees,
-        testNotes: testNotes.map((arr) =>
-          arr.map((testNote) => noteToDegree(testNote, keyNote))
-        ),
-      });
       if (chordType !== "single-note") {
-        console.log({ chordType }, "line 175");
-        console.log([...chosenDegrees].sort());
-        console.log(
-          [
-            ...testNotes.map((arr) =>
-              arr.map((testNote) => noteToDegree(testNote, keyNote))
-            ),
-          ].sort()
-        );
         return _.isEqual(
           chosenDegrees.map((list) => [...list].sort()),
           testNotes
@@ -322,7 +262,6 @@
 
     async function playNewExercise() {
       testNotes = createExerciseNotes(exerciseLength, chordType);
-      console.log({ testNotes });
       await playExercise(testNotes);
     }
     document.querySelector(
@@ -335,7 +274,7 @@
         document.querySelector(
           "#current-exercise-length"
         ).innerText = `Exercise length: ${exerciseLength}`;
-        console.log("***", chordType);
+
         document.querySelector("#your-answer").innerHTML = `Your answer: `;
 
         resetUserInput();
@@ -374,7 +313,7 @@
           baseUrl: "https://tonejs.github.io/audio/salamander/",
         }).toDestination();
         await Tone.loaded();
-        // const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+
         const now = Tone.now();
         sampler.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now);
         sampler.triggerAttackRelease(
