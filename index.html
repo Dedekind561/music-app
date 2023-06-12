@@ -166,6 +166,16 @@
           arr.map((testNote) => noteToDegree(testNote, keyNote))
         ),
       });
+      if (chordType === "dyad") {
+        return _.isEqual(
+          [...chosenDegrees].sort(),
+          [
+            ...testNotes.map((arr) =>
+              arr.map((testNote) => noteToDegree(testNote, keyNote))
+            ),
+          ].sort()
+        );
+      }
       return _.isEqual(
         chosenDegrees,
         testNotes.map((arr) =>
