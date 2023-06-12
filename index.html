@@ -80,13 +80,18 @@
         //     i++;
         //   }
         // } while (i < chosenDegrees.length);
-
+        const chordTypeToNumber = {
+          "single-note": 1,
+          dyad: 2,
+          triad: 3,
+          tetrad: 4,
+        };
         console.log({ exerciseLength, chosenDegrees });
         for (let i = 0; i < exerciseLength; i++) {
           console.log({ i });
           if (!chosenDegrees[i]) {
             chosenDegrees[i] = [chosenDegree];
-          } else if (chosenDegrees[i].length === 1) {
+          } else if (chosenDegrees[i].length < chordTypeToNumber[chordType]) {
             chosenDegrees[i].push(chosenDegree);
           }
         }
@@ -166,14 +171,23 @@
           arr.map((testNote) => noteToDegree(testNote, keyNote))
         ),
       });
-      if (chordType === "dyad") {
-        return _.isEqual(
-          [...chosenDegrees].sort(),
+      if (chordType !== "single-note") {
+        console.log({ chordType }, "line 175");
+        console.log([...chosenDegrees].sort());
+        console.log(
           [
             ...testNotes.map((arr) =>
               arr.map((testNote) => noteToDegree(testNote, keyNote))
             ),
           ].sort()
+        );
+        return _.isEqual(
+          chosenDegrees.map((list) => [...list].sort()),
+          testNotes
+            .map((arr) =>
+              arr.map((testNote) => noteToDegree(testNote, keyNote))
+            )
+            .map((list) => [...list].sort())
         );
       }
       return _.isEqual(
