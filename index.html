@@ -85,6 +85,13 @@
         console.log(document.querySelector("#feedback-icon"));
         // document.querySelector("#feedback-icon").innerHtml = "&#10003;";
         document.querySelector("#feedback-icon").style.color = "green";
+      } else {
+        document.querySelector(
+          "#feedback"
+        ).innerHTML = `Not quite right! :<span id="feedback-icon">&#10006;</span>, the answer was ${JSON.stringify(
+          testNotes.map((testNote) => noteToDegree(testNote, keyNote))
+        )}`;
+        document.querySelector("#feedback-icon").style.color = "red";
       }
       chosenDegrees = [];
       document.querySelector("#chosen-degrees").innerText = "";
@@ -177,6 +184,8 @@
     document
       .getElementById("play-button")
       ?.addEventListener("click", async () => {
+        chosenDegrees = [];
+        document.querySelector("#chosen-degrees").innerText = "";
         await Tone.start();
         const synth = new Tone.PolySynth(Tone.Synth).toDestination();
         const now = Tone.now();
