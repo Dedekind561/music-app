@@ -80,10 +80,18 @@
     resetUserInput();
 
     document.querySelector("#backspace").addEventListener("click", (e) => {
-      document.querySelector("#chosen-degrees").innerText = document
-        .querySelector("#chosen-degrees")
-        .innerText.slice(0, -1);
       chosenDegrees.pop();
+      for (let i = 0; i < exerciseLength; i++) {
+        if (chosenDegrees[i] === undefined) {
+          document.querySelector(
+            `#your-answer span:nth-child(${i + 1})`
+          ).innerText = "_";
+        } else {
+          document.querySelector(
+            `#your-answer span:nth-child(${i + 1})`
+          ).innerText = chosenDegrees[i];
+        }
+      }
     });
 
     document.querySelector("#chord-select").addEventListener("change", (e) => {
@@ -199,11 +207,21 @@
     async function playExercise(testNotes) {
       await Tone.start();
 
-      const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      const sampler = new Tone.Sampler({
+        urls: {
+          C4: "C4.mp3",
+          "D#4": "Ds4.mp3",
+          "F#4": "Fs4.mp3",
+          A4: "A4.mp3",
+        },
+        release: 1,
+        baseUrl: "https://tonejs.github.io/audio/salamander/",
+      }).toDestination();
+      await Tone.loaded();
       const now = Tone.now();
 
       testNotes.forEach((noteArr, index) => {
-        synth.triggerAttackRelease(noteArr, "2n", now + index);
+        sampler.triggerAttackRelease(noteArr, "2n", now + index);
       });
     }
     const createExerciseNotes = (exerciseLength, chordType) => {
@@ -267,20 +285,31 @@
         resetUserInput();
 
         await Tone.start();
-        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        const sampler = new Tone.Sampler({
+          urls: {
+            C4: "C4.mp3",
+            "D#4": "Ds4.mp3",
+            "F#4": "Fs4.mp3",
+            A4: "A4.mp3",
+          },
+          release: 1,
+          baseUrl: "https://tonejs.github.io/audio/salamander/",
+        }).toDestination();
+        await Tone.loaded();
+        // const synth = new Tone.PolySynth(Tone.Synth).toDestination();
         const now = Tone.now();
-        synth.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now);
-        synth.triggerAttackRelease(
+        sampler.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now);
+        sampler.triggerAttackRelease(
           buildMajorTriad(getSubdominant(keyNote)),
           "2n",
           now + 1
         );
-        synth.triggerAttackRelease(
+        sampler.triggerAttackRelease(
           buildMajorTriad(getDominant(keyNote)),
           "2n",
           now + 2
         );
-        synth.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now + 3);
+        sampler.triggerAttackRelease(buildMajorTriad(keyNote), "2n", now + 3);
 
         const diatonicNotes = getDiatonicNotes("C4");
       });
