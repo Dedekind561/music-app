@@ -51,6 +51,8 @@
     <p id="current-key"></p>
   </body>
   <script>
+    // click on a button
+    // then
     let exerciseLength = 1;
     let keyNote = "C4";
     let chosenDegrees = [];
@@ -61,24 +63,76 @@
       console.log({ chosenDegrees });
       document.querySelector(`#button-${id}`).addEventListener("click", (e) => {
         const chosenDegree = +e.target.innerText;
-        chosenDegrees.push([chosenDegree]);
+        // chosenDegrees.push([chosenDegree]);
+        // let i = 0;
+        // console.log(chosenDegrees, "<------- before while loop");
+        // do {
+        //   const element = chosenDegrees[i];
+        //   if (element) {
+        //     if (!element[0]) {
+        //       element[0] = chosenDegree;
+        //       break;
+        //     }
+        //     if (!element[1]) {
+        //       element[1] = chosenDegree;
+        //       break;
+        //     }
+        //     i++;
+        //   }
+        // } while (i < chosenDegrees.length);
+
         console.log({ exerciseLength, chosenDegrees });
         for (let i = 0; i < exerciseLength; i++) {
-          if (chosenDegrees[i] === undefined) {
-            document.querySelector(
-              `#your-answer span:nth-child(${i + 1})`
-            ).innerText = "_";
-          } else {
-            document.querySelector(
-              `#your-answer span:nth-child(${i + 1})`
-            ).innerText = chosenDegrees[i];
+          console.log({ i });
+          if (!chosenDegrees[i]) {
+            chosenDegrees[i] = [chosenDegree];
+          } else if (chosenDegrees[i].length === 1) {
+            chosenDegrees[i].push(chosenDegree);
           }
         }
+        console.log("8".repeat(20), chosenDegrees);
+        document.querySelector("#your-answer").innerHtml =
+          "Your answer:  " + `<span></span>`.repeat(exerciseLength);
+        chosenDegrees.forEach((degrees, index) => {
+          document.querySelector(
+            `#your-answer span:nth-child(${index + 1})`
+          ).innerText = "";
+          degrees.forEach((degree) => {
+            console.log(
+              document.querySelector(
+                `#your-answer span:nth-child(${index + 1})`
+              )
+            );
+            console.log({ degree }, "<<<<");
+            // document.querySelector(`#your-answer span:nth-child(${index + 1})`);
+
+            document.querySelector(
+              `#your-answer span:nth-child(${index + 1})`
+            ).innerText += `${degree},`;
+          });
+        });
+        // for (let i = 0; i < exerciseLength; i++) {
+        //   console.log(chosenDegrees);
+        //   if (chosenDegrees[i] === undefined) {
+        //     document.querySelector(
+        //       `#your-answer span:nth-child(${i + 1})`
+        //     ).innerText = "_";
+        //   } else {
+        //     console.log("(****************)");
+        //     chosenDegrees.forEach((degree) => {
+        //       console.log(
+        //         document.querySelector(`#your-answer span:nth-child(${i + 1})`)
+        //       );
+        //       document.querySelector(
+        //         `#your-answer span:nth-child(${i + 1})`
+        //       ).innerHtml += `<p>${degree}</p>`;
+        //     });
+        //   }
+        // }
       });
     });
 
     resetUserInput();
-
     document.querySelector("#backspace").addEventListener("click", (e) => {
       chosenDegrees.pop();
       for (let i = 0; i < exerciseLength; i++) {
