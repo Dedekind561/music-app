@@ -58,17 +58,26 @@
     let chordType;
     const buttonIds = [1, 2, 3, 4, 5, 6, 7];
     buttonIds.forEach((id) => {
+      console.log({ chosenDegrees });
       document.querySelector(`#button-${id}`).addEventListener("click", (e) => {
-        const chosenDegree = e.target.innerText;
-        chosenDegrees.push(chosenDegree);
-        chosenDegrees.forEach((degree, index) => {
-          console.log({ degree });
-          document.querySelector(
-            `#your-answer span:nth-child(${index + 1})`
-          ).innerText = chosenDegrees[index];
-        });
+        const chosenDegree = +e.target.innerText;
+        chosenDegrees.push([chosenDegree]);
+        console.log({ exerciseLength, chosenDegrees });
+        for (let i = 0; i < exerciseLength; i++) {
+          if (chosenDegrees[i] === undefined) {
+            document.querySelector(
+              `#your-answer span:nth-child(${i + 1})`
+            ).innerText = "_";
+          } else {
+            document.querySelector(
+              `#your-answer span:nth-child(${i + 1})`
+            ).innerText = chosenDegrees[i];
+          }
+        }
       });
     });
+
+    resetUserInput();
 
     document.querySelector("#backspace").addEventListener("click", (e) => {
       document.querySelector("#chosen-degrees").innerText = document
@@ -91,13 +100,14 @@
       console.log({ chosenDegrees, testNotes });
       console.log({
         chosenDegrees,
-        testNotes: testNotes.map((testNote) => noteToDegree(testNote, keyNote)),
+        testNotes: testNotes.map((arr) =>
+          arr.map((testNote) => noteToDegree(testNote, keyNote))
+        ),
       });
       return _.isEqual(
-        chosenDegrees.map(Number),
-        testNotes.map(
-          (testNote) =>
-            getDiatonicNotes(keyNote).findIndex((note) => note === testNote) + 1
+        chosenDegrees,
+        testNotes.map((arr) =>
+          arr.map((testNote) => noteToDegree(testNote, keyNote))
         )
       );
     }
@@ -110,7 +120,9 @@
           document.querySelector(
             "#feedback"
           ).innerHTML = `You're right! :<span id="feedback-icon">&#10003;</span>, the answer was ${JSON.stringify(
-            testNotes.map((testNote) => noteToDegree(testNote, keyNote))
+            testNotes.map((arr) =>
+              arr.map((testNote) => noteToDegree(testNote, keyNote))
+            )
           )}`;
           document.querySelector("#feedback-icon").style.color = "green";
         } else {
@@ -122,7 +134,8 @@
           document.querySelector("#feedback-icon").style.color = "red";
         }
         chosenDegrees = [];
-        document.querySelector("#chosen-degrees").innerText = "";
+        document.querySelector("#your-answer").innerText = "Your answer: ";
+        resetUserInput();
         await playNewExercise();
       });
     document.querySelector("#current-key").innerText = `Key: ${keyNote}`;
@@ -213,6 +226,7 @@
 
     async function playNewExercise() {
       testNotes = createExerciseNotes(exerciseLength, chordType);
+      console.log({ testNotes });
       await playExercise(testNotes);
     }
     document.querySelector(
@@ -221,29 +235,37 @@
     document
       .getElementById("exercise-length")
       ?.addEventListener("input", (e) => {
-        exerciseLength = e.target.value;
+        exerciseLength = +e.target.value;
         document.querySelector(
           "#current-exercise-length"
         ).innerText = `Exercise length: ${exerciseLength}`;
         console.log("***", chordType);
-        Array.from({ length: exerciseLength }, () => {
-          const chordTypeToNumber = {
-            "single-note": 1,
-            dyad: 2,
-            triad: 3,
-            tetrad: 4,
-          };
-          const p = document.createElement("span");
-          p.innerText = "_".repeat(exerciseLength);
-          p.style.marginLeft = "2px";
-          document.querySelector("#your-answer").appendChild(p);
-        });
+        document.querySelector("#your-answer").innerHTML = `Your answer: `;
+
+        resetUserInput();
       });
+
+    function resetUserInput() {
+      Array.from({ length: exerciseLength }, () => {
+        const chordTypeToNumber = {
+          "single-note": 1,
+          dyad: 2,
+          triad: 3,
+          tetrad: 4,
+        };
+        const p = document.createElement("span");
+        p.innerText = "_";
+        p.style.marginLeft = "2px";
+        document.querySelector("#your-answer").appendChild(p);
+      });
+    }
     document
       .getElementById("play-button")
       ?.addEventListener("click", async () => {
         chosenDegrees = [];
-        document.querySelector("#chosen-degrees").innerText = "";
+        document.querySelector("#your-answer").innerText = "Your answer: ";
+        resetUserInput();
+
         await Tone.start();
         const synth = new Tone.PolySynth(Tone.Synth).toDestination();
         const now = Tone.now();
